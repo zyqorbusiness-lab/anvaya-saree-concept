@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
-<head>
+<head><script>(function(){try{if(!matchMedia('(prefers-reduced-motion: reduce)').matches&&Element.prototype.animate&&'IntersectionObserver' in window){document.documentElement.classList.add('dr-wait');setTimeout(function(){document.documentElement.classList.remove('dr-wait')},2500)}}catch(e){}})()</script><style>html.dr-wait body{opacity:0!important}</style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ANVAYA — Woven in Divinity | Sacred Sharadiya Saree Concept</title>
@@ -3598,11 +3598,14 @@
   function infSet(){var s=new Set();try{document.getAnimations().forEach(function(a){try{if(a.effect&&a.effect.getComputedTiming().iterations===Infinity&&a.effect.target)s.add(a.effect.target)}catch(e){}})}catch(e){}return s}
   function hasText(el){for(var n=el.firstChild;n;n=n.nextSibling){if(n.nodeType===3&&/\S/.test(n.nodeValue))return true}return false}
   var targets=[];
+  function isCard(el,cs){var bg=cs.backgroundColor;var hasBg=bg&&bg!=='rgba(0, 0, 0, 0)'&&bg!=='transparent';var hasImg=cs.backgroundImage!=='none';var b=Math.min(parseFloat(cs.borderTopWidth)||0,parseFloat(cs.borderBottomWidth)||0,parseFloat(cs.borderLeftWidth)||0,parseFloat(cs.borderRightWidth)||0);if(!(hasBg||hasImg||b>0))return false;var r=el.getBoundingClientRect();if(r.height<8||r.height>innerHeight*0.7||r.width<8)return false;return /\S/.test(el.textContent||'')||!!el.querySelector('img,svg,video')}
   function walk(el,inf){
     if(el.nodeType!==1||SKIP.test(el.tagName)||inf.has(el))return;
     if(el.getAttribute('aria-hidden')==='true'||el.hasAttribute('hidden'))return;
     var cs=getComputedStyle(el);
     if(cs.display==='none'||cs.position==='fixed'||cs.position==='sticky'||cs.visibility==='hidden')return;
+    var tg=el.tagName;
+    if(tg==='BUTTON'||isCard(el,cs)){if(el.getBoundingClientRect().width>8)targets.push(el);return}
     var tag=el.tagName;
     if(MEDIA.test(tag)||(tag==='svg'&&el.getBoundingClientRect().width>=48)){if(!(el.closest&&el.closest('button,a')&&tag==='svg'))targets.push(el);return}
     if(tag==='svg')return;
@@ -3641,12 +3644,12 @@
     var io=new IntersectionObserver(function(es){
       var enter=es.filter(function(e){var was=e.target.__in;e.target.__in=e.isIntersecting;return e.isIntersecting&&!was});
       enter.sort(function(a,b){return a.boundingClientRect.top-b.boundingClientRect.top});
-      enter.forEach(function(e,i){play(e.target,Math.min(i*70,350))});
+      enter.forEach(function(e,i){play(e.target,Math.min(i*70,350))});document.documentElement.classList.remove('dr-wait');
     },{threshold:0,rootMargin:'0px 0px -30px 0px'});
     targets.forEach(function(t){io.observe(t)});
     window.__dropTargets=targets.length;
   }
-  if(document.readyState==='complete')setTimeout(start,400);else window.addEventListener('load',function(){setTimeout(start,400)});
+  start();
 })();
 </script>
 </body>
