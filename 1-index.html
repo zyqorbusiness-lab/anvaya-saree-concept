@@ -3614,9 +3614,9 @@
   }
   function clipAnc(el){var out=[];for(var p=el.parentElement;p&&p!==document.body&&p!==document.documentElement;p=p.parentElement){var s=getComputedStyle(p);if(s.overflowY==='hidden'||s.overflowY==='clip'||s.overflowX==='hidden'||s.overflowX==='clip')out.push(p)}return out}
   function play(el,delay){
+    if(el.__dropA){try{el.__dropA.cancel()}catch(e){}}
     var r=el.getBoundingClientRect();if(r.width<2||r.height<2)return;
     var dy=-(r.bottom+30);
-    if(el.__dropA){try{el.__dropA.cancel()}catch(e){}}
     var cs=getComputedStyle(el),restore=[];
     if(cs.display==='inline'){el.style.display='inline-block';restore.push(function(){el.style.display=''})}
     if(cs.position==='static'){el.style.position='relative';restore.push(function(){el.style.position=''})}
@@ -3642,7 +3642,7 @@
     [document.body].forEach(function(r){walk(r,inf)});
     var seen=new Set();targets=targets.filter(function(t){if(seen.has(t))return false;seen.add(t);return true});
     var io=new IntersectionObserver(function(es){
-      var enter=es.filter(function(e){var was=e.target.__in;e.target.__in=e.isIntersecting;return e.isIntersecting&&!was});
+      var enter=es.filter(function(e){if(e.target.__dropA&&e.target.__dropA.playState==='running')return false;var was=e.target.__in;e.target.__in=e.isIntersecting;return e.isIntersecting&&!was});
       enter.sort(function(a,b){return a.boundingClientRect.top-b.boundingClientRect.top});
       enter.forEach(function(e,i){play(e.target,Math.min(i*70,350))});document.documentElement.classList.remove('dr-wait');
     },{threshold:0,rootMargin:'0px 0px -30px 0px'});
