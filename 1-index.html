@@ -2054,6 +2054,8 @@
       opacity: 1;
       transform: translateY(0);
     }
+    /* Top-entry drop: elements fall in from above the screen (see observer script) */
+    .reveal-on-scroll { transform: none; transition: opacity 0.2s ease; }
 
     /* Keyframes & Reduced Motion Support */
     @keyframes slow-spin {
@@ -3570,12 +3572,30 @@
         });
       }, { passive: true });
 
+      function dropIn(el) {
+        el.classList.add('revealed');
+        const calm = (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) || document.body.classList.contains('reduce-motion');
+        if (calm || !el.animate) return;
+        const r = el.getBoundingClientRect();
+        const dy = -(r.bottom + 30);
+        const wasStatic = getComputedStyle(el).position === 'static';
+        if (wasStatic) el.style.position = 'relative';
+        el.style.zIndex = '30';
+        const dur = 750 + Math.min(1, Math.abs(dy) / innerHeight) * 550;
+        const a = el.animate([
+          { transform: 'translate3d(0,' + dy + 'px,0)', easing: 'cubic-bezier(.55,.06,.85,.5)' },
+          { transform: 'translate3d(0,0,0)', offset: 0.72, easing: 'cubic-bezier(.2,.7,.4,1)' },
+          { transform: 'translate3d(0,-9px,0)', offset: 0.86, easing: 'cubic-bezier(.6,0,.9,.5)' },
+          { transform: 'translate3d(0,0,0)' }
+        ], { duration: dur, fill: 'backwards' });
+        a.onfinish = a.oncancel = function () { el.style.zIndex = ''; if (wasStatic) el.style.position = ''; };
+      }
       const revealEls = document.querySelectorAll('.reveal-on-scroll');
       if ('IntersectionObserver' in window) {
         const io = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('revealed');
+              dropIn(entry.target);
               io.unobserve(entry.target);
             }
           });
